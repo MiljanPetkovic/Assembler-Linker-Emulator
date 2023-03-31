@@ -1,0 +1,19 @@
+Symbols
+0	0	0	NOTYP	LOC	0	UND	0
+1	0	0	NOTYP	GLOB	1	mathAdd	0
+2	13	0	NOTYP	GLOB	1	mathSub	0
+3	26	0	NOTYP	GLOB	1	mathMul	0
+4	39	0	NOTYP	GLOB	1	mathDiv	0
+5	0	4c	SCTN	LOC	1	math	0
+rela.math
+bin.math
+b0	16	12	a0	06	03	04	00	
+a0	16	03	06	00	70	01	a0	
+16	42	40	b0	16	12	a0	06	
+03	04	00	a0	16	03	06	00	
+71	01	a0	16	42	40	b0	16	
+12	a0	06	03	04	00	a0	16	
+03	06	00	72	01	a0	16	42	
+40	b0	16	12	a0	06	03	04	
+00	a0	16	03	06	00	73	01	
+a0	16	42	40	

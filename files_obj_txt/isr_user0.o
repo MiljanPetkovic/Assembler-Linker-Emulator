@@ -1,0 +1,12 @@
+Symbols
+0	0	0	NOTYP	LOC	0	UND	0
+1	0	0	NOTYP	GLOB	0	value0	1
+2	0	1a	SCTN	LOC	1	isr	0
+3	0	0	NOTYP	GLOB	1	isr_user0	0
+rela.isr
+e	16_ABS	value0	0
+bin.isr
+b0	06	12	b0	16	12	a0	0f	
+00	cd	ab	a0	1f	00	00	00	
+b0	01	02	a0	16	42	a0	06	
+42	20	

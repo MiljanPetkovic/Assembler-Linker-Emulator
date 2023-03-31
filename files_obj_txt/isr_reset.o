@@ -1,0 +1,9 @@
+Symbols
+0	0	0	NOTYP	LOC	0	UND	0
+1	0	0	NOTYP	GLOB	0	my_start	1
+2	0	5	SCTN	LOC	1	isr	0
+3	0	0	NOTYP	GLOB	1	isr_reset	0
+rela.isr
+3	16_ABS	my_start	0
+bin.isr
+50	ff	00	00	00	

@@ -1,0 +1,7 @@
+Symbols
+0	0	0	NOTYP	LOC	0	UND	0
+1	0	1	SCTN	LOC	1	isr	0
+2	0	0	NOTYP	GLOB	1	isr_timer	0
+rela.isr
+bin.isr
+20	

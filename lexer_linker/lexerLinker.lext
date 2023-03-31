@@ -1,0 +1,53 @@
+%option c++
+%{
+  #include <string>
+  #include <iostream>
+  #include <cstring>
+  #include "../inc/assembler.h"
+
+enum READ{
+  HEX_VALUE = 0,
+  SYMBOL,
+  SYMBOLS_TABLE,
+  RELOCATION_TABLE,
+  SECTIONS_TEXT,
+  ESCAPE_SPACES,
+  NEW_LINE,
+  END_FILE,
+  PCREL,
+  ABS,
+  T
+};
+
+  using namespace std;
+  int ln = 0;
+%}
+
+symbolsTable Symbols
+pcRel 16_PCREL
+abs 16_ABS
+relocation_table rela\..+
+sectionsText bin\..+
+hexValue [0-9abcdefABCDEF]+
+symbol ([a-zA-Z_.]{1}[a-zA-Z0-9_.$]*)
+
+%%
+[\:] { return T;}
+
+{symbolsTable} { return SYMBOLS_TABLE;}
+{pcRel} {return PCREL;}
+{abs} {return ABS;}
+{relocation_table} { return RELOCATION_TABLE;}
+{sectionsText} { return SECTIONS_TEXT;}
+{hexValue} {return HEX_VALUE;}
+{symbol} {return SYMBOL;}
+
+[ \t,;] { return ESCAPE_SPACES;}
+\n {ln++; return NEW_LINE;}
+<<EOF>> { return END_FILE; }
+
+%%
+
+int yyFlexLexer::yywrap(){
+  return 1;
+}

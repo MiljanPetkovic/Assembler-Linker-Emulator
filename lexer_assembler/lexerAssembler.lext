@@ -1,0 +1,178 @@
+%option c++
+%{
+  #include <string>
+  #include <iostream>
+  #include <cstring>
+  #include "../inc/assembler.h"
+
+  #define STRING 0
+  #define END_FILE 1
+  #define NEW_LINE 2
+  #define ESCAPE_SPACES 3
+  #define LABEL 4
+  #define LITERAL 5
+  #define SYMBOL 6
+  #define PLUS 7
+  #define MINUS 8
+  #define OPEN_PARENTHESIS 9
+  #define CLOSE_PARENTHESIS 10
+  #define OPEN_PARENTHESIS_JMP 11
+  #define OPEN_COMMENT 12
+  #define REGISTER 13
+
+enum INSTRUCTION_TYPE{
+  INSTRUCTION_NOOP = 14,
+  INSTRUCTION_JMP,
+  INSTRUCTION_ONE_REG,
+  INSTRUCTION_TWO_REG,
+  INSTRUCTION_PUSH,
+  INSTRUCTION_POP,
+  INSTRUCTION_LOAD_STORE
+};
+
+enum ARG_VALUE_TYPE{
+    ARG_LITERAL_VALUE = 21,
+    ARG_SYMBOL_VALUE,
+    ARG_SYMBOL_MEM_PCREL,
+    ARG_REG_INDIR,
+    ARG_REG_LITERAL_MEM,
+    ARG_REG_SYMBOL_MEM
+  };
+
+  enum JMP_DEST_TYPE{
+    JMP_ARG_SYMBOL_VALUE_PCREL = 27,
+    JMP_LITERAL_MEM,
+    JMP_SYMBOL_MEM,
+    JMP_REG_DIR,
+    JMP_ARG_REG_INDIR,
+    JMP_ARG_REG_LITERAL_MEM,
+    JMP_ARG_REG_SYMBOL_MEM
+  };
+
+   enum DIRECTIVES_TYPE{
+      DIRECTIVES_GLOBAL = 34,
+      DIRECTIVES_EXTERN,
+      DIRECTIVES_SECTION,
+      DIRECTIVES_WORD,
+      DIRECTIVES_SKIP,
+      DIRECTIVES_ASCII,
+      DIRECTIVES_EQU,
+      DIRECTIVES_END
+    };
+
+
+
+  enum OPERAND_TYPE{
+    OPERAND_TYPE_REG = 49,
+    OPERAND_TYPE_LITERAL,
+    OPERAND_TYPE_SYMBOL
+  };
+
+  
+  
+  using namespace std;
+  int ln = 0;
+%}
+
+string "\"".+"\""
+label ^[a-zA-Z_0-9]+:
+symbol ([a-zA-Z_.]{1}[a-zA-Z0-9_.$]*)
+register (r[0-7])
+literal (("-")?[1-9]{1}[0-9]*|"0"[oO]{1}[0-7]+|"0"[xX]{1}[0-9abcdefABCDEF]+|"0"[bB]{1}[0-1]+|"0")
+literal_value "$"(("-")?[1-9]{1}[0-9]*|"0"[oO]{1}[0-7]+|"0"[xX]{1}[0-9abcdefABCDEF]+|"0"[bB]{1}[0-1]+|"0")
+symbol_value ("$"[a-zA-Z_.]{1}[a-zA-Z0-9_.$]*)
+symbol_pc_rel ("%"[a-zA-Z_.]{1}[a-zA-Z0-9_.$]*)
+jmp_reg_dir ("\*r"[0-7])
+jmp_literal_mem_dir "\*"(("-")?[1-9]{1}[0-9]*|"0"[oO]{1}[0-7]+|"0"[xX]{1}[0-9abcdefABCDEF]+|"0"[bB]{1}[0-1]+|"0")
+jmp_symbol ("\*"[a-zA-Z_.]{1}[a-zA-Z0-9_.$]*)
+
+
+/* DIRECTIVES*/
+global ".global"
+extern ".extern"
+section ".section"
+word ".word"
+skip ".skip"
+ascii ".ascii"
+equ ".equ"
+end ".end"
+
+/*INSTRUCTIONS*/
+halt "halt"
+int "int"
+iret "iret"
+call "call"
+ret "ret"
+jmp "jmp"
+jeq "jeq"
+jne "jne"
+jgt "jgt"
+push "push"
+pop "pop"
+xchg "xchg"
+add "add"
+sub "sub"
+mul "mul"
+div "div"
+cmp "cmp"
+not "not"
+and "and"
+or "or"
+xor "xor"
+test "test"
+shl "shl"
+shr "shr"
+ldr "ldr"
+str "str"
+
+%%
+[\[] { return OPEN_PARENTHESIS;}
+[\]] { return CLOSE_PARENTHESIS;}
+
+"\*\[" { return OPEN_PARENTHESIS_JMP;}
+
+[\+] { return PLUS;}
+[\-] { return MINUS;}
+
+[ \t,;] { return ESCAPE_SPACES;}
+\n {ln++; return NEW_LINE;}
+<<EOF>> { return END_FILE; }
+
+".intel_syntax noprefix" {}
+"#".* { return OPEN_COMMENT;}
+
+{global} {return DIRECTIVES_GLOBAL;}
+{extern} { return DIRECTIVES_EXTERN;}
+{section} { return DIRECTIVES_SECTION;}
+{word} {return DIRECTIVES_WORD;}
+{skip} { return DIRECTIVES_SKIP;}
+{ascii} {return DIRECTIVES_ASCII;}
+{equ} {return DIRECTIVES_EQU;}
+{end} {return DIRECTIVES_END;}
+{register} { return REGISTER;}
+
+({halt}|{iret}|{ret}) {return INSTRUCTION_NOOP;}
+({int}|{push}|{pop}|{not}) {return INSTRUCTION_ONE_REG;}
+({jmp}|{jeq}|{jne}|{jgt}|{call}) {return INSTRUCTION_JMP;}
+({add}|{sub}|{mul}|{div}|{cmp}|{xchg}|{and}|{or}|{xor}|{test}|{shl}|{shr}) { return INSTRUCTION_TWO_REG;}
+({ldr}|{str}) {return INSTRUCTION_LOAD_STORE;}
+
+{literal_value} {return ARG_LITERAL_VALUE;}
+{symbol_value} { return ARG_SYMBOL_VALUE;}
+{symbol_pc_rel} {return ARG_SYMBOL_MEM_PCREL;}
+
+{label} { return LABEL;}
+{literal} { return LITERAL; }
+{symbol} { return SYMBOL; }
+
+{jmp_reg_dir} { return JMP_REG_DIR;} 
+{jmp_literal_mem_dir} { return JMP_LITERAL_MEM;}
+{jmp_symbol} { return JMP_SYMBOL_MEM;}
+
+{string} { return STRING;}
+
+%%
+
+int yyFlexLexer::yywrap(){
+  return 1;
+}
